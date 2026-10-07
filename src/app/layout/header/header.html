@@ -1,0 +1,199 @@
+<header
+  class="sticky top-0 z-20 h-16 shrink-0 flex items-center justify-between gap-3 px-4 md:px-6 bg-gray-950 border-b border-white/10"
+>
+  <div class="flex items-center gap-3 min-w-0">
+    <!-- Botón de menú (tablet y móvil) -->
+    <button
+      type="button"
+      (click)="alternarMenu.emit()"
+      aria-label="Abrir menú"
+      class="lg:hidden w-10 h-10 shrink-0 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-gray-300 flex items-center justify-center cursor-pointer"
+    >
+      <i class="bi bi-list text-xl leading-none"></i>
+    </button>
+
+    <div class="flex flex-col leading-tight min-w-0">
+      <span class="text-sm sm:text-base font-semibold text-white truncate">
+        Sistema de Gestión Documentaria
+      </span>
+      <span class="hidden sm:block text-xs text-gray-400 truncate">
+        {{ dependenciaActiva()?.desc ?? 'Sin dependencia seleccionada' }} - Sede Central
+      </span>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+    <!-- Notificaciones -->
+    <button
+      type="button"
+      aria-label="Notificaciones"
+      class="relative w-10 h-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-gray-300 flex items-center justify-center cursor-pointer"
+    >
+      <i class="bi bi-bell"></i>
+      <span
+        class="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center"
+      >
+        9
+      </span>
+    </button>
+
+    <div class="hidden sm:block w-px h-8 bg-white/10"></div>
+
+    <!-- Usuario -->
+    <div class="relative">
+      <!-- Fondo invisible: cierra el menú al hacer clic fuera -->
+      @if (menuUsuarioAbierto()) {
+        <div class="fixed inset-0 z-10" (click)="menuUsuarioAbierto.set(false)"></div>
+      }
+
+      <button
+        type="button"
+        (click)="menuUsuarioAbierto.set(!menuUsuarioAbierto())"
+        class="relative z-20 shrink-0 rounded-full cursor-pointer outline-none transition-shadow hover:ring-2 hover:ring-white/10 focus-visible:ring-2 focus-visible:ring-[#4A7AC7]/60"
+        [class.ring-2]="menuUsuarioAbierto()"
+        [class.ring-white/10]="menuUsuarioAbierto()"
+        aria-label="Menú de usuario"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="menuUsuarioAbierto()"
+      >
+        <div
+          class="w-10 h-10 rounded-full bg-[#4A7AC7]/15 text-[#4A7AC7] text-xs font-bold flex items-center justify-center"
+        >
+          {{ iniciales() }}
+        </div>
+        <span
+          class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-gray-600 border-2 border-primary-900 text-white flex items-center justify-center"
+        >
+          <i
+            class="bi bi-chevron-down text-[8px] leading-none transition-transform duration-200"
+            [class.rotate-180]="menuUsuarioAbierto()"
+          ></i>
+        </span>
+      </button>
+
+      <!-- Menú desplegable -->
+      <div
+        role="menu"
+        [attr.aria-hidden]="!menuUsuarioAbierto()"
+        class="absolute z-20 right-0 top-full mt-3 w-70 origin-top-right rounded-xl bg-primary-900 border border-white/10 shadow-xl shadow-black/40 overflow-hidden transition duration-150 ease-out"
+        [class]="
+          menuUsuarioAbierto()
+            ? 'opacity-100 scale-100 translate-y-0 visible'
+            : 'opacity-0 scale-95 -translate-y-1 invisible pointer-events-none'
+        "
+      >
+        <!-- Datos del usuario -->
+        <div class="px-4 py-3 border-b border-white/10 flex items-center gap-3">
+          <div
+            class="w-10 h-10 shrink-0 rounded-full bg-[#4A7AC7]/15 text-[#4A7AC7] text-xs font-bold flex items-center justify-center"
+          >
+            {{ iniciales() }}
+          </div>
+          <div class="min-w-0 flex flex-col leading-tight">
+            <p class="text-sm font-semibold text-white truncate">{{ nombreCompleto() }}</p>
+            <p class="text-xs text-gray-400 truncate">
+              {{ dependenciaActiva()?.desc ?? '—' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="p-1.5 flex flex-col gap-0.5">
+          <button
+            type="button"
+            role="menuitem"
+            (click)="alCambiarDependencia()"
+            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer text-left"
+          >
+            <i class="bi bi-arrow-left-right"></i>
+            Cambiar dependencia
+          </button>
+
+          <div class="my-1 h-px bg-white/10"></div>
+
+          <button
+            type="button"
+            role="menuitem"
+            (click)="alCerrarSesion()"
+            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer text-left"
+          >
+            <i class="bi bi-box-arrow-right"></i>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<p-dialog
+  [(visible)]="modalDependenciaVisible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-md"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+        <i class="bi bi-diagram-3 text-white"></i>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-lg font-semibold text-gray-800 leading-tight">Cambiar dependencia</span>
+        <span class="text-xs text-gray-400">Elige la dependencia con la que trabajarás</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <p-iconfield class="mt-4 mb-3 block">
+    <input
+      pInputText
+      type="text"
+      placeholder="Buscar por nombre o sigla..."
+      [ngModel]="filtroDependencia()"
+      (ngModelChange)="filtroDependencia.set($event)"
+      [ngModelOptions]="{ standalone: true }"
+      class="w-full border-gray-200! shadow-none! outline-none! focus:border-slate-300! focus:ring-4! focus:ring-primary/10!"
+    />
+    <p-inputicon class="pi pi-search" />
+  </p-iconfield>
+
+  @if (!cargandoDependencia()) {
+    <p class="text-xs text-gray-400 mb-2">
+      {{ dependenciasFiltradas().length }} de {{ dependencias().length }} dependencias
+    </p>
+  }
+
+  @if (cargandoDependencia()) {
+    <p class="text-sm text-gray-400 text-center py-8">Cargando dependencias...</p>
+  } @else {
+    <div class="flex flex-col gap-2 max-h-72 overflow-y-auto scrollbar-thin pr-1">
+      @for (dep of dependenciasFiltradas(); track dep.cod) {
+        <button
+          type="button"
+          (click)="seleccionarDependencia(dep)"
+          class="flex items-center gap-3 text-left px-3 py-2.5 rounded-lg border transition-colors cursor-pointer"
+          [class]="
+            dep.cod === dependenciaActiva()?.cod
+              ? 'border-primary bg-primary-50'
+              : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+          "
+        >
+          <span
+            class="shrink-0 min-w-12 text-center text-xs font-bold px-2 py-1 rounded-md bg-primary text-white"
+          >
+            {{ dep.descCorta }}
+          </span>
+          <span class="flex-1 text-sm text-gray-700">{{ dep.desc }}</span>
+          @if (dep.cod === dependenciaActiva()?.cod) {
+            <i class="bi bi-check-lg text-primary"></i>
+          }
+        </button>
+      } @empty {
+        <div class="flex flex-col items-center gap-2 py-8 text-gray-400">
+          <i class="bi bi-search text-2xl"></i>
+          <p class="text-sm">No se encontraron dependencias</p>
+        </div>
+      }
+    </div>
+  }
+</p-dialog>

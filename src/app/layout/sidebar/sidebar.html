@@ -1,0 +1,130 @@
+@if (abierto()) {
+  <div class="fixed inset-0 z-30 bg-black/50 lg:hidden" (click)="cerrar.emit()"></div>
+}
+
+<aside
+  class="fixed inset-y-0 left-0 z-40 flex flex-col bg-primary-900 text-gray-300 border-r border-white/10 transition-all duration-200 w-[90%] max-w-[320px] md:w-16 lg:w-70"
+  [class]="abierto() ? 'translate-x-0 md:w-70' : '-translate-x-full md:translate-x-0'"
+>
+  <!-- Logo -->
+  <div class="px-6 pt-6 pb-8" [class]="abierto() ? '' : 'md:px-3 lg:px-6'">
+    <div
+      class="w-10 h-10 rounded-xl bg-[#4A7AC7] text-primary-900 font-black flex items-center justify-center"
+    >
+      UG
+    </div>
+  </div>
+
+  <!-- Menú -->
+  <nav
+    class="flex-1 px-3 flex flex-col gap-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+  >
+    <!-- Inicio (estático) -->
+    <a
+      routerLink="/home"
+      routerLinkActive="bg-white/10 text-white border-[#4A7AC7]"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="cerrar.emit()"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-l-2 border-transparent hover:bg-white/5 hover:text-white"
+      [class]="centrarEnRail()"
+    >
+      <i class="bi bi-house"></i>
+      <span class="flex-1" [class]="ocultarEnRail()">Inicio</span>
+    </a>
+
+    @for (grupo of menu(); track grupo.idGroupOpc) {
+      <div
+        class="rounded-lg transition-colors duration-200 px-1"
+        [class]="estaAbierto(grupo.idGroupOpc) ? 'bg-gray-900' : ''"
+      >
+        <a
+          (click)="alternarGrupo(grupo.idGroupOpc)"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-l-2 border-transparent"
+          [class]="
+            (estaAbierto(grupo.idGroupOpc)
+              ? 'text-white'
+              : 'text-gray-300 hover:bg-white/5 hover:text-white') +
+            ' ' +
+            centrarEnRail()
+          "
+        >
+          <i class="bi {{ iconoGrupo(grupo.idGroupOpc) }}"></i>
+          <span class="flex-1" [class]="ocultarEnRail()">{{ grupo.deGroupOpc }}</span>
+          <i
+            class="bi bi-chevron-right text-xs transition-transform duration-200"
+            [class]="(estaAbierto(grupo.idGroupOpc) ? 'rotate-90' : '') + ' ' + ocultarEnRail()"
+          ></i>
+        </a>
+
+        <div
+          class="grid transition-all duration-200 ease-in-out"
+          [class]="
+            estaAbierto(grupo.idGroupOpc)
+              ? 'grid-rows-[1fr] opacity-100'
+              : 'grid-rows-[0fr] opacity-0'
+          "
+        >
+          <div class="overflow-hidden">
+            <div
+              class="ml-6 pl-3 border-l border-white/10 flex flex-col gap-0.5 mb-1 pb-1"
+              [class]="ocultarEnRailBlock()"
+            >
+              @for (opcion of grupo.menuChildren; track opcion.codOpc) {
+                @if (opcion.pathOpc) {
+                  <a
+                    [routerLink]="'/' + opcion.pathOpc"
+                    routerLinkActive="text-white bg-gray-950"
+                    (click)="cerrar.emit()"
+                    class="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-white/5 cursor-pointer"
+                  >
+                    <!-- Cuando icon_opc esté poblado en la base:
+                    @if (opcion.iconOpc) {
+                      <i class="bi {{ opcion.iconOpc }}"></i>
+                    }
+                    -->
+                    {{ opcion.titleOpc }}
+                  </a>
+                } @else {
+                  <span
+                    class="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-600 cursor-not-allowed"
+                  >
+                    {{ opcion.titleOpc }}
+                  </span>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </nav>
+
+  <!-- Pie -->
+  <div class="px-4 py-4 border-t border-white/10 flex flex-col gap-3">
+    <div class="flex items-center gap-3" [class]="centrarEnRail()">
+      <div
+        class="w-9 h-9 rounded-lg bg-[#4A7AC7] text-primary-900 text-xs font-black flex items-center justify-center shrink-0"
+      >
+        UG
+      </div>
+      <div class="flex flex-col leading-tight" [class]="ocultarEnRailBlock()">
+        <span class="text-sm font-semibold text-white">UGEL Huancavelica</span>
+        <span class="text-xs text-gray-400">Sede Central</span>
+      </div>
+    </div>
+
+    <div class="text-xs text-gray-500 flex flex-col gap-0.5" [class]="ocultarEnRailBlock()">
+      <span>Equipo: Trámite Documentario</span>
+      <span>Versión 5.0</span>
+    </div>
+
+    <button
+      type="button"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-gray-300 cursor-pointer"
+      [class]="abierto() ? '' : 'md:px-0'"
+    >
+      <i class="bi bi-folder"></i>
+      <span [class]="ocultarEnRail()">Carpeta de documentos</span>
+    </button>
+  </div>
+</aside>

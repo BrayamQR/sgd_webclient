@@ -1,0 +1,235 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+  <div
+    class="w-full max-w-4xl bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex"
+  >
+    <div
+      class="hidden md:flex w-1/2 bg-primary flex-col justify-between p-10 relative overflow-hidden"
+    >
+      <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full border border-white/10"></div>
+      <div class="absolute -bottom-24 -left-10 w-72 h-72 rounded-full border border-white/10"></div>
+      <div class="absolute top-1/3 -right-8 w-32 h-32 rounded-full bg-white/5"></div>
+
+      <div class="relative z-10 flex items-center gap-4">
+        <div class="bg-white rounded-xl p-3 shadow-sm">
+          <img src="/images/logo.png" alt="UGEL Huancavelica" class="w-25" />
+        </div>
+        <div class="w-1 h-20 bg-[#4A7AC7]/60"></div>
+        <p class="text-[#4A7AC7] text-lg font-black leading-snug">
+          UNIDAD DE GESTIÓN<br />EDUCATIVA LOCAL
+        </p>
+      </div>
+
+      <div class="relative z-10 flex flex-col gap-6">
+        <div>
+          <div class="w-10 h-px bg-white/20 mb-4"></div>
+          <p class="text-white text-2xl font-semibold leading-tight">
+            Sistema de Gestión Documental
+          </p>
+          <p class="text-primary-100 text-sm mt-2">
+            Plataforma institucional de trámite y seguimiento documentario
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-4 mt-2">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+              <i class="pi pi-shield text-white text-sm"></i>
+            </div>
+            <p class="text-primary-100 text-sm">Acceso seguro con autenticación institucional</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+              <i class="pi pi-file-check text-white text-sm"></i>
+            </div>
+            <p class="text-primary-100 text-sm">Seguimiento de trámites en tiempo real</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+              <i class="pi pi-sitemap text-white text-sm"></i>
+            </div>
+            <p class="text-primary-100 text-sm">Gestión por dependencias y áreas</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="relative z-10 text-primary-200 text-xs">© {{ anioActual }} UGEL Huancavelica</p>
+    </div>
+
+    <div class="w-full md:w-1/2 flex flex-col justify-center px-8 py-12 md:px-12">
+      <div class="flex md:hidden flex-col items-center gap-3 mb-8">
+        <div class="relative z-10 flex items-center gap-4">
+          <img src="/images/logo.png" alt="UGEL Huancavelica" class="w-25" />
+
+          <div class="w-1 h-20 bg-primary/60"></div>
+          <p class="text-primary text-lg font-black leading-snug">
+            UNIDAD DE GESTIÓN<br />EDUCATIVA LOCAL
+          </p>
+        </div>
+        <p class="text-gray-800 font-bold text-center text-xl">Sistema de Gestión Documental</p>
+        <div class="w-full h-0.5 bg-gray-500/10"></div>
+      </div>
+
+      <div class="flex flex-col items-center gap-1">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">Iniciar sesión</h1>
+        <p class="text-sm text-gray-400 mb-5">Ingresa tus credenciales para continuar</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+        <p-fluid>
+          <p-floatlabel variant="in">
+            <p-iconfield>
+              <input
+                pInputText
+                id="usuario"
+                type="text"
+                formControlName="codUser"
+                (input)="onUsuarioInput($event)"
+                [invalid]="form.controls.codUser.invalid && form.controls.codUser.touched"
+              />
+              <p-inputicon class="pi pi-user" />
+            </p-iconfield>
+            <label for="usuario"> Usuario <span class="text-red-500 align-sub">*</span> </label>
+          </p-floatlabel>
+          @if (form.controls.codUser.invalid && form.controls.codUser.touched) {
+            <small class="text-red-500">El usuario es obligatorio</small>
+          }
+        </p-fluid>
+
+        <p-fluid>
+          <p-floatlabel variant="in">
+            <p-iconfield>
+              <input
+                pPassword
+                [type]="mostrarPassword ? 'text' : 'password'"
+                id="password"
+                [feedback]="false"
+                formControlName="password"
+                [invalid]="form.controls.password.invalid && form.controls.password.touched"
+              />
+              <p-inputicon
+                [class]="mostrarPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                class="cursor-pointer"
+                (click)="mostrarPassword = !mostrarPassword"
+              />
+            </p-iconfield>
+            <label for="password"> Contraseña <span class="text-red-500 align-sub">*</span> </label>
+          </p-floatlabel>
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <small class="text-red-500">La contraseña es obligatoria</small>
+          }
+        </p-fluid>
+
+        <p-fluid>
+          <p-floatlabel variant="in">
+            <p-iconfield>
+              <input
+                pInputText
+                id="dependencia"
+                type="text"
+                readonly
+                [disabled]="!dependenciaHabilitada()"
+                [value]="dependenciaSeleccionada?.desc ?? ''"
+                (click)="abrirModalDependencia()"
+                [class.cursor-pointer]="dependenciaHabilitada()"
+                [class.cursor-not-allowed]="!dependenciaHabilitada()"
+                [invalid]="form.controls.dependencia.invalid && form.controls.dependencia.touched"
+              />
+              <p-inputicon class="pi pi-search" />
+            </p-iconfield>
+            <label for="dependencia">
+              Dependencia <span class="text-red-500 align-sub">*</span>
+            </label>
+          </p-floatlabel>
+          @if (form.controls.dependencia.invalid && form.controls.dependencia.touched) {
+            <small class="text-red-500">Selecciona una dependencia</small>
+          }
+          @if (cargandoDependencia()) {
+            <small class="text-gray-400">Buscando dependencias...</small>
+          } @else if (form.controls.codUser.value?.trim() && dependencias().length === 0) {
+            <small class="text-gray-400">No se encontraron dependencias para este usuario</small>
+          }
+        </p-fluid>
+
+        <div class="flex items-center gap-2">
+          <p-checkbox formControlName="recordarme" [binary]="true" inputId="recordarme" />
+          <label for="recordarme" class="text-sm text-gray-600 cursor-pointer">
+            Mantener sesión iniciada
+          </label>
+        </div>
+
+        <button pButton type="submit" class="mt-2 h-11">Ingresar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="modalDependenciaVisible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-md"
+  [pt]="{ header: { class: 'border-b! border-gray-100! pb-4!' } }"
+  (onHide)="onCerrarModalDependencia()"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+        <i class="pi pi-sitemap text-white"></i>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-lg font-semibold text-gray-800 leading-tight">
+          Seleccionar dependencia
+        </span>
+        <span class="text-xs text-gray-400">Elige el área con la que ingresarás</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <p-iconfield class="mt-4 mb-3 block">
+    <input
+      pInputText
+      type="text"
+      placeholder="Buscar por nombre o sigla..."
+      [ngModel]="filtroDependencia()"
+      (ngModelChange)="filtroDependencia.set($event)"
+      [ngModelOptions]="{ standalone: true }"
+      class="w-full border-gray-200! shadow-none! outline-none! focus:border-slate-300! focus:ring-4! focus:ring-primary/10!"
+    />
+    <p-inputicon class="pi pi-search" />
+  </p-iconfield>
+
+  <p class="text-xs text-gray-400 mb-2">
+    {{ dependenciasFiltradas().length }} de {{ dependencias().length }} dependencias
+  </p>
+
+  <div class="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+    @for (dep of dependenciasFiltradas(); track dep.cod) {
+      <button
+        type="button"
+        (click)="seleccionarDependencia(dep)"
+        class="flex items-center gap-3 text-left px-3 py-2.5 rounded-lg border transition-colors cursor-pointer"
+        [class]="
+          dep.cod === dependenciaSeleccionada?.cod
+            ? 'border-primary bg-primary-50'
+            : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+        "
+      >
+        <span
+          class="shrink-0 min-w-12 text-center text-xs font-bold px-2 py-1 rounded-md bg-primary text-white"
+        >
+          {{ dep.descCorta }}
+        </span>
+        <span class="flex-1 text-sm text-gray-700">{{ dep.desc }}</span>
+        @if (dep.cod === dependenciaSeleccionada?.cod) {
+          <i class="pi pi-check text-primary"></i>
+        }
+      </button>
+    } @empty {
+      <div class="flex flex-col items-center gap-2 py-8 text-gray-400">
+        <i class="bi bi-search text-2xl"></i>
+        <p class="text-sm">No se encontraron dependencias</p>
+      </div>
+    }
+  </div>
+</p-dialog>

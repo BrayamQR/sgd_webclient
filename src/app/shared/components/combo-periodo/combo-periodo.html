@@ -1,0 +1,166 @@
+<div class="w-full flex flex-col">
+  <p-floatlabel variant="in" class="block">
+    <p-inputgroup>
+      <input
+        id="f-refperiodo"
+        pInputText
+        type="text"
+        readonly
+        class="w-full outline-none cursor-pointer"
+        [value]="etiqueta()"
+        (click)="abrir()"
+      />
+      <button
+        type="button"
+        pButton
+        icon="bi bi-calendar3"
+        severity="secondary"
+        [outlined]="true"
+        class="transition-transform duration-150 hover:shadow-md"
+        aria-label="Ver tipo de periodo"
+        (click)="abrir()"
+      ></button>
+    </p-inputgroup>
+    <label for="f-refperiodo">Periodo</label>
+  </p-floatlabel>
+
+  <p-dialog
+    [(visible)]="modalVisible"
+    [modal]="true"
+    [draggable]="false"
+    [dismissableMask]="true"
+    styleClass="w-full max-w-sm"
+    [breakpoints]="{ '640px': '94vw' }"
+    [style]="{ 'max-height': '88vh' }"
+    [contentStyle]="{ 'max-height': '70vh', overflow: 'auto' }"
+    [pt]="{ header: { class: 'border-b! border-slate-100! pb-4!' } }"
+  >
+    <ng-template #header>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shrink-0">
+          <i class="bi bi-calendar3 text-white"></i>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-lg font-semibold text-slate-800 leading-tight">
+            Seleccionar período
+          </span>
+          <span class="text-xs text-slate-400">Elige cómo filtrar por fecha</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <div class="flex flex-col gap-1">
+      @for (preset of presets; track preset.id) {
+        <div>
+          <button
+            type="button"
+            class="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors cursor-pointer"
+            [class]="estaAplicado(preset) ? 'bg-sky-50 text-sky-700' : 'hover:bg-slate-50'"
+            (click)="onClickPreset(preset)"
+          >
+            <i class="bi {{ preset.icono }} text-slate-500"></i>
+            <span class="flex-1">{{ preset.label }}</span>
+            @if (!preset.auto) {
+              <i
+                class="bi bi-chevron-down text-xs text-slate-400 transition-transform duration-200"
+                [class.rotate-180]="estaExpandido(preset)"
+              ></i>
+            }
+          </button>
+
+          <div
+            class="grid transition-[grid-template-rows] duration-200 ease-in-out"
+            [class.grid-rows-[1fr]]="estaExpandido(preset)"
+            [class.grid-rows-[0fr]]="!estaExpandido(preset)"
+          >
+            <div class="overflow-hidden">
+              <div class="px-1 py-3">
+                @if (preset.id === 'dia') {
+                  <p-datepicker
+                    inline="true"
+                    dateFormat="dd/mm/yy"
+                    [minDate]="minDate()"
+                    [maxDate]="maxDate()"
+                    [ngModel]="pendienteDia()"
+                    (ngModelChange)="pendienteDia.set($event)"
+                    styleClass="w-full"
+                  />
+                }
+                @if (preset.id === 'mes') {
+                  <p-datepicker
+                    inline="true"
+                    view="month"
+                    dateFormat="mm/yy"
+                    [minDate]="minDate()"
+                    [maxDate]="maxDate()"
+                    [ngModel]="pendienteMes()"
+                    (ngModelChange)="pendienteMes.set($event)"
+                    styleClass="w-full"
+                  />
+                }
+                @if (preset.id === 'anio') {
+                  <div class="flex flex-col gap-1">
+                    @for (anio of anios(); track anio) {
+                      <button
+                        type="button"
+                        class="w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
+                        [class]="
+                          pendienteAnio() === anio
+                            ? 'bg-sky-50 text-sky-700 font-semibold'
+                            : 'text-slate-600 hover:bg-slate-50'
+                        "
+                        (click)="seleccionarAnio(anio)"
+                      >
+                        {{ anio }}
+                        @if (pendienteAnio() === anio) {
+                          <i class="bi bi-check-lg text-sky-600"></i>
+                        }
+                      </button>
+                    } @empty {
+                      <p class="text-sm text-slate-400 text-center py-4">
+                        Cargando años disponibles...
+                      </p>
+                    }
+                  </div>
+                }
+                @if (preset.id === 'rango') {
+                  <p-datepicker
+                    inline="true"
+                    selectionMode="range"
+                    dateFormat="dd/mm/yy"
+                    [minDate]="minDate()"
+                    [maxDate]="maxDate()"
+                    [ngModel]="pendienteRango()"
+                    (ngModelChange)="pendienteRango.set($event)"
+                    styleClass="w-full"
+                  />
+                }
+
+                <div class="flex items-center justify-end gap-2 pt-3">
+                  <p-button
+                    label="Cancelar"
+                    [text]="true"
+                    severity="secondary"
+                    (onClick)="cancelar()"
+                  />
+                  <p-button
+                    label="Aceptar"
+                    severity="success"
+                    [disabled]="
+                      preset.id === 'rango'
+                        ? !pendienteRango()?.[0] || !pendienteRango()?.[1]
+                        : preset.id === 'anio'
+                          ? pendienteAnio() === null
+                          : false
+                    "
+                    (onClick)="aceptar()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </p-dialog>
+</div>

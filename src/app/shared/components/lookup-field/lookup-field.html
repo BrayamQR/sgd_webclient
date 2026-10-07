@@ -1,0 +1,96 @@
+<p-floatlabel variant="in" class="block">
+  <p-inputgroup>
+    <input
+      [id]="inputId()"
+      pInputText
+      type="text"
+      readonly
+      class="w-full outline-none cursor-pointer"
+      [value]="etiquetaDe(seleccionada())"
+      (click)="abrir()"
+    />
+    <button
+      type="button"
+      pButton
+      icon="bi bi-search"
+      severity="secondary"
+      [outlined]="true"
+      class="transition-transform duration-150 hover:shadow-md"
+      [attr.aria-label]="'Buscar ' + label()"
+      (click)="abrir()"
+    ></button>
+  </p-inputgroup>
+  <label [for]="inputId()">{{ label() }}</label>
+</p-floatlabel>
+
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-md"
+  [pt]="{ header: { class: 'border-b! border-slate-100! pb-4!' } }"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shrink-0">
+        <i class="bi bi-search text-white"></i>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-lg font-semibold text-slate-800 leading-tight">
+          {{ tituloModal() }}
+        </span>
+        <span class="text-xs text-slate-400">Elige un valor de la lista</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <p-iconfield class="mt-4 mb-3 block">
+    <input
+      pInputText
+      type="text"
+      [placeholder]="placeholder()"
+      [ngModel]="busqueda()"
+      (ngModelChange)="busqueda.set($event)"
+      [ngModelOptions]="{ standalone: true }"
+      class="w-full border-slate-200! shadow-none! outline-none! focus:border-slate-300! focus:ring-4! focus:ring-sky-500/10!"
+    />
+    <p-inputicon><i class="bi bi-search"></i></p-inputicon>
+  </p-iconfield>
+
+  <p class="text-xs text-slate-400 mb-2">
+    {{ filtradas().length }} de {{ opcionesVisibles().length }} resultados
+  </p>
+
+  <div class="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+    @for (o of filtradas(); track valorDe(o)) {
+      <button
+        type="button"
+        (click)="seleccionar(o)"
+        class="flex items-center gap-3 text-left px-3 py-2.5 rounded-lg border transition-colors cursor-pointer"
+        [class]="
+          esSeleccionada(o)
+            ? 'border-sky-600 bg-sky-50'
+            : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+        "
+      >
+        @if (insigniaDe(o)) {
+          <span
+            class="shrink-0 min-w-12 text-center text-xs font-bold px-2 py-1 rounded-md bg-sky-600 text-white"
+          >
+            {{ insigniaDe(o) }}
+          </span>
+        }
+        <span class="flex-1 text-sm text-slate-700">{{ etiquetaDe(o) }}</span>
+        @if (esSeleccionada(o)) {
+          <i class="bi bi-check-lg text-sky-600"></i>
+        }
+      </button>
+    } @empty {
+      <div class="flex flex-col items-center gap-2 py-8 text-slate-400">
+        <i class="bi bi-search text-2xl"></i>
+        <p class="text-sm">No se encontraron resultados</p>
+      </div>
+    }
+  </div>
+</p-dialog>

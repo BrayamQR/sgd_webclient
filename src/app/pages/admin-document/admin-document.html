@@ -1,0 +1,495 @@
+<div class="space-y-4 p-5">
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Documentos administrativos</h1>
+      <p class="text-slate-500">
+        Elabora, consulta y da seguimiento a tus documentos administrativos
+      </p>
+    </div>
+    <p-button
+      label="Nuevo"
+      severity="primary"
+      icon="bi bi-plus-lg"
+      styleClass="w-full sm:w-auto transition-transform duration-150 hover:shadow-md"
+    />
+  </header>
+
+  <button
+    type="button"
+    class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 shadow-sm cursor-pointer lg:hidden"
+    (click)="filtrosMovilAbierto.set(true)"
+  >
+    <i class="bi bi-sliders"></i>
+    Filtros
+  </button>
+
+  <section class="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:block">
+    <ng-container
+      [ngTemplateOutlet]="filtrosForm"
+      [ngTemplateOutletContext]="{ compacto: false }"
+    />
+  </section>
+
+  <section
+    class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:max-h-[calc(100vh-27rem)] lg:min-h-88"
+  >
+    <p-table
+      [value]="documentos"
+      [scrollable]="true"
+      scrollHeight="flex"
+      [tableStyle]="{ 'min-width': '70rem' }"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} a {last} de {totalRecords} registros"
+      styleClass="flex min-h-0 flex-1 flex-col"
+    >
+      <ng-template #header>
+        <tr>
+          <th class="w-12">N°</th>
+          <th>Documento</th>
+          <th>Asunto</th>
+          <th>Destinatario</th>
+          <th>Elaborado por</th>
+          <th>Expediente</th>
+          <th>Estado</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-doc>
+        <tr class="align-top text-sm">
+          <td>{{ doc.numero }}</td>
+          <td>
+            <div class="font-semibold">{{ doc.tipo }}</div>
+            <div class="text-xs text-slate-500">{{ doc.nroDoc }}</div>
+            <div class="text-xs text-slate-500">{{ doc.fecha }}</div>
+          </td>
+          <td class="max-w-72">
+            {{ doc.asunto }}
+            @if (doc.prioridad === 'Urgente') {
+              <div class="mt-0.5 text-xs font-semibold text-pink-600">Urgente</div>
+            }
+          </td>
+          <td class="max-w-60">{{ doc.destinatario }}</td>
+          <td>{{ doc.elaboradoPor }}</td>
+          <td class="tabular-nums text-slate-500">{{ doc.expediente }}</td>
+          <td>
+            <p-tag
+              [value]="estadoLabelDe(doc)"
+              [severity]="estadoSeverityDe(doc)"
+              [rounded]="true"
+            />
+          </td>
+          <td>
+            <button
+              type="button"
+              class="ml-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm text-slate-500 shadow-sm shadow-slate-300 ring-1 ring-slate-200 transition-colors duration-150 hover:bg-slate-100 cursor-pointer"
+              aria-haspopup="true"
+              aria-label="Más acciones"
+              (click)="acciones.toggle($event)"
+            >
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+
+            <p-popover #acciones appendTo="body">
+              <div class="flex w-44 flex-col gap-1 p-1">
+                <button
+                  type="button"
+                  class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-sky-50 hover:text-sky-600 cursor-pointer"
+                  (click)="verInfo(doc); acciones.hide()"
+                >
+                  <i class="bi bi-info-circle"></i>
+                  Ver información
+                </button>
+                <button
+                  type="button"
+                  class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-amber-50 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-700 cursor-pointer"
+                  [disabled]="doc.estado !== 'proyecto'"
+                  (click)="acciones.hide()"
+                >
+                  <i class="bi bi-pencil"></i>
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600 cursor-pointer"
+                  (click)="acciones.hide()"
+                >
+                  <i class="bi bi-file-earmark-text"></i>
+                  Ver documento
+                </button>
+                <button
+                  type="button"
+                  class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer"
+                  (click)="acciones.hide()"
+                >
+                  <i class="bi bi-paperclip"></i>
+                  Ver anexos
+                </button>
+                <button
+                  type="button"
+                  class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-orange-50 hover:text-orange-600 cursor-pointer"
+                  (click)="acciones.hide()"
+                >
+                  <i class="bi bi-arrow-left-right"></i>
+                  Seguimiento
+                </button>
+                <button
+                  type="button"
+                  class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+                  (click)="acciones.hide()"
+                >
+                  <i class="bi bi-link-45deg"></i>
+                  Vincular tema
+                </button>
+              </div>
+            </p-popover>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog
+  [(visible)]="filtrosMovilAbierto"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-lg"
+  [breakpoints]="{ '640px': '94vw' }"
+  [style]="{ 'max-height': '88vh' }"
+  [contentStyle]="{ 'max-height': '65vh', overflow: 'auto' }"
+  [pt]="{ header: { class: 'border-b! border-slate-100! pb-4!' } }"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shrink-0">
+        <i class="bi bi-sliders text-white"></i>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-lg font-semibold text-slate-800 leading-tight">Filtros</span>
+        <span class="text-xs text-slate-400">Ajusta los criterios de búsqueda</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-container [ngTemplateOutlet]="filtrosForm" [ngTemplateOutletContext]="{ compacto: true }" />
+
+  <ng-template #footer>
+    <div class="flex items-center justify-between gap-2 pt-2">
+      <p-button
+        label="Más filtros"
+        icon="bi bi-sliders"
+        severity="secondary"
+        [outlined]="true"
+        [attr.aria-expanded]="avanzados()"
+        (onClick)="avanzados.set(!avanzados())"
+      />
+      <div class="flex items-center gap-2">
+        <p-button label="Limpiar" [text]="true" severity="secondary" (onClick)="limpiarFiltros()" />
+        <p-button
+          label="Buscar"
+          severity="primary"
+          styleClass="transition-transform duration-150 hover:shadow-md"
+          (onClick)="buscar()"
+        />
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<ng-template #filtrosForm let-compacto="compacto">
+  <div [class]="compacto ? 'flex flex-col gap-3' : 'flex flex-col gap-2.5 sm:flex-row'">
+    <p-floatlabel variant="in" class="flex-2">
+      <p-iconfield>
+        <p-inputicon><i class="bi bi-search"></i></p-inputicon>
+        <input id="f-texto" pInputText class="w-full outline-none" [(ngModel)]="filtros.texto" />
+      </p-iconfield>
+      <label for="f-texto">Buscar</label>
+    </p-floatlabel>
+    <p-floatlabel variant="in" [class]="compacto ? 'w-full' : 'flex-1'">
+      <app-combo-periodo [(valor)]="filtros.periodo" (rangoCambio)="rango.set($event)" />
+    </p-floatlabel>
+    <p-floatlabel variant="in" [class]="compacto ? 'w-full' : 'flex-1'">
+      <p-select
+        appendTo="body"
+        inputId="f-sTipodoc"
+        styleClass="w-full outline-none"
+        [options]="tipos()"
+        [(ngModel)]="filtros.sTipodoc"
+        optionLabel="desc"
+        optionValue="cod"
+      />
+      <label for="f-sTipodoc">Tipo de documento</label>
+    </p-floatlabel>
+  </div>
+
+  <div [class]="compacto ? 'mt-4 flex flex-col gap-3' : 'mt-3 flex flex-wrap gap-2.5 items-center'">
+    <p-floatlabel variant="in" [class]="compacto ? 'w-full' : 'flex-1 basis-36'">
+      <p-select
+        appendTo="body"
+        inputId="f-sEstadoDoc"
+        styleClass="w-full outline-none"
+        [options]="estados()"
+        [(ngModel)]="filtros.sEstadoDoc"
+        optionLabel="desc"
+        optionValue="cod"
+      />
+      <label for="f-sEstadoDoc">Estado</label>
+    </p-floatlabel>
+    <p-floatlabel variant="in" [class]="compacto ? 'w-full' : 'flex-1 basis-36'">
+      <p-select
+        appendTo="body"
+        inputId="f-sPrioridadDoc"
+        styleClass="w-full outline-none"
+        [options]="prioridades()"
+        [(ngModel)]="filtros.sPrioridadDoc"
+        optionLabel="desc"
+        optionValue="cod"
+      />
+      <label for="f-sPrioridadDoc">Prioridad</label>
+    </p-floatlabel>
+    <p-floatlabel variant="in" [class]="compacto ? 'w-full' : 'flex-1 basis-36'">
+      <p-select
+        appendTo="body"
+        inputId="f-sParaFirmar"
+        styleClass="w-full outline-none"
+        [options]="vbOpciones"
+        [(ngModel)]="filtros.sParaFirmar"
+        optionLabel="desc"
+        optionValue="cod"
+      />
+      <label for="f-sParaFirmar">Doc. para firmar V°B°</label>
+    </p-floatlabel>
+    <p-floatlabel variant="in" [class]="compacto ? 'w-full' : 'flex-1 basis-36'">
+      <p-select
+        appendTo="body"
+        inputId="f-sFirmadoPor"
+        [(ngModel)]="filtros.sFirmadoPor"
+        [options]="empFirma()"
+        optionLabel="desc"
+        optionValue="cod"
+        [filter]="true"
+        filterBy="desc"
+        filterPlaceholder="Buscar firmante..."
+        emptyFilterMessage="Sin resultados"
+        fluid
+        styleClass="w-full"
+      />
+      <label for="f-sFirmadoPor">Firmado por</label>
+    </p-floatlabel>
+  </div>
+
+  <div
+    class="grid transition-[grid-template-rows] duration-300 ease-in-out"
+    [class.grid-rows-[1fr]]="avanzados()"
+    [class.grid-rows-[0fr]]="!avanzados()"
+  >
+    <div class="overflow-hidden">
+      <div class="flex flex-col gap-4 pt-4">
+        <fieldset class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <legend class="px-2 text-sm font-semibold">Buscar documento en referencias</legend>
+          <div
+            [class]="
+              compacto ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 gap-4 min-[480px]:grid-cols-3'
+            "
+          >
+            <app-lookup-field
+              [class]="compacto ? 'block' : 'block min-[480px]:col-span-3'"
+              inputId="f-txtDepEmiteBus"
+              label="Dependencia que emite"
+              [opciones]="depEmiteOpciones()"
+              [(seleccionada)]="depEmiteSeleccionada"
+            />
+            <p-floatlabel variant="in" class="block">
+              <p-select
+                appendTo="body"
+                inputId="f-sDeTipoDocAdm"
+                styleClass="w-full outline-none"
+                [options]="tipos()"
+                [(ngModel)]="filtros.sDeTipoDocAdm"
+                optionLabel="desc"
+                optionValue="cod"
+              />
+              <label for="f-sDeTipoDocAdm">Tipo de documento</label>
+            </p-floatlabel>
+            <p-floatlabel variant="in" class="block">
+              <input
+                id="f-sNumDocRef"
+                pInputText
+                class="w-full outline-none"
+                [(ngModel)]="filtros.sNumDocRef"
+              />
+              <label for="f-sNumDocRef">N° doc.</label>
+            </p-floatlabel>
+            <p-floatlabel variant="in" class="block">
+              <p-select
+                appendTo="body"
+                inputId="f-sCoAnnioBus"
+                styleClass="w-full outline-none"
+                [options]="anios()"
+                [(ngModel)]="filtros.sCoAnnioBus"
+                optionLabel="desc"
+                optionValue="cod"
+              />
+              <label for="f-sCoAnnioBus">Año</label>
+            </p-floatlabel>
+          </div>
+        </fieldset>
+
+        <fieldset class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <legend class="px-2 text-sm font-semibold">Origen, destino y seguimiento</legend>
+          <div
+            [class]="compacto ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 gap-4 sm:grid-cols-3'"
+          >
+            <app-lookup-field
+              class="block"
+              inputId="f-txtRefOrigen"
+              label="Referencia origen"
+              [opciones]="refOrigenOpciones()"
+              [(seleccionada)]="refOrigenSeleccionada"
+            />
+            <app-lookup-field
+              class="block"
+              inputId="f-txtDestinatario"
+              label="Destinatario"
+              [opciones]="refDestinoOpciones()"
+              [(seleccionada)]="refDestinoSeleccionada"
+            />
+
+            <app-lookup-field
+              class="block"
+              inputId="f-deEmpRec"
+              label="Trabajador destino"
+              [opciones]="empDestinoOpciones()"
+              [(seleccionada)]="empDestinoSeleccionada"
+            />
+            <app-lookup-field
+              class="block"
+              inputId="f-txtElaboradoPor"
+              label="Elaborado por"
+              [opciones]="empElaboraOpciones()"
+              [(seleccionada)]="empElaboraSeleccionada"
+            />
+            <p-floatlabel variant="in" class="block">
+              <p-select
+                appendTo="body"
+                inputId="f-coTema"
+                styleClass="w-full outline-none"
+                [options]="temas()"
+                [(ngModel)]="filtros.coTema"
+                optionLabel="desc"
+                optionValue="cod"
+              />
+              <label for="f-coTema">Tema</label>
+            </p-floatlabel>
+            <p-floatlabel variant="in" class="block">
+              <p-select
+                appendTo="body"
+                inputId="f-coEstMensajeria"
+                styleClass="w-full outline-none"
+                [options]="envios()"
+                [(ngModel)]="filtros.coEstMensajeria"
+                optionLabel="desc"
+                optionValue="cod"
+              />
+              <label for="f-coEstMensajeria">Estado de envío (mensajería)</label>
+            </p-floatlabel>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  @if (!compacto) {
+    <div class="mt-3.5 flex items-center justify-between gap-2">
+      <p-button
+        label="Más filtros"
+        icon="bi bi-sliders"
+        severity="secondary"
+        [outlined]="true"
+        styleClass="transition-transform duration-150 hover:shadow-md"
+        [attr.aria-expanded]="avanzados()"
+        (onClick)="avanzados.set(!avanzados())"
+      />
+      <div class="flex items-center gap-2">
+        <p-button label="Limpiar" [text]="true" severity="secondary" (onClick)="limpiarFiltros()" />
+        <p-button
+          label="Buscar"
+          severity="primary"
+          styleClass="transition-transform duration-150 hover:shadow-md"
+          (onClick)="buscar()"
+        />
+      </div>
+    </div>
+  }
+</ng-template>
+
+<p-dialog
+  header="Información del trámite"
+  [(visible)]="infoVisible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '38rem' }"
+  [breakpoints]="{ '640px': '94vw' }"
+  (onHide)="onCerrarInfo()"
+>
+  @if (docInfoSeleccionado(); as d) {
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h3 class="text-lg font-semibold">{{ d.tipo }}</h3>
+        <div class="text-slate-500">{{ d.nroDoc }}</div>
+      </div>
+      <p-tag [value]="estadoLabelDe(d)" [severity]="estadoSeverityDe(d)" [rounded]="true" />
+    </div>
+
+    <dl
+      class="mt-4 grid grid-cols-1 gap-x-5 gap-y-3.5 sm:grid-cols-2 [&_dt]:text-xs [&_dt]:text-slate-500 [&_dd]:font-medium"
+    >
+      <div class="sm:col-span-2">
+        <dt>Asunto</dt>
+        <dd>{{ d.asunto }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt>Destinatario</dt>
+        <dd>{{ d.destinatario }}</dd>
+      </div>
+      <div>
+        <dt>Fecha de elaboración</dt>
+        <dd>{{ d.fecha }}</dd>
+      </div>
+      <div>
+        <dt>Prioridad</dt>
+        <dd>{{ d.prioridad }}</dd>
+      </div>
+      <div>
+        <dt>Elaborado por</dt>
+        <dd>{{ d.elaboradoPor }}</dd>
+      </div>
+      <div>
+        <dt>N° de expediente</dt>
+        <dd>{{ d.expediente }}</dd>
+      </div>
+      <div>
+        <dt>Referencia origen</dt>
+        <dd>{{ d.referenciaOrigen || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Tema</dt>
+        <dd>{{ d.tema || '—' }}</dd>
+      </div>
+    </dl>
+  }
+  <ng-template #footer>
+    <p-button
+      label="Cerrar"
+      severity="secondary"
+      [outlined]="true"
+      styleClass="transition-transform duration-150 hover:-translate-y-0.5"
+      (onClick)="infoVisible.set(false)"
+    />
+  </ng-template>
+</p-dialog>

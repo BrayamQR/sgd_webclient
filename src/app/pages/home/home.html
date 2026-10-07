@@ -1,0 +1,144 @@
+<div class="flex flex-col gap-6">
+  <!-- Saludo -->
+  <div>
+    <h1 class="text-2xl font-bold text-gray-800">Bienvenido, Brayam</h1>
+    <p class="text-sm text-gray-500 capitalize">{{ fecha }} · Sede Central</p>
+  </div>
+
+  <!-- Tarjetas de resumen -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+      <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+        <i class="bi bi-envelope text-lg"></i>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Bandeja de entrada</p>
+        <p class="text-3xl font-bold text-gray-800">9</p>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600"
+          >2 urgente</span
+        >
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
+          >7 normal</span
+        >
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+      <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+        <i class="bi bi-pencil text-lg"></i>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Borradores</p>
+        <p class="text-3xl font-bold text-gray-800">2</p>
+      </div>
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 w-fit"
+        >En elaboración</span
+      >
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+      <div
+        class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"
+      >
+        <i class="bi bi-pen text-lg"></i>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Para firma</p>
+        <p class="text-3xl font-bold text-gray-800">0</p>
+      </div>
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 w-fit"
+        >Sin pendientes</span
+      >
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
+      <div class="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+        <i class="bi bi-send text-lg"></i>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Enviados</p>
+        <p class="text-3xl font-bold text-gray-800">0</p>
+      </div>
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 w-fit"
+        >Hoy</span
+      >
+    </div>
+  </div>
+
+  <!-- Documentos recientes + Estado de trámites -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <!-- Documentos recientes -->
+    <div class="xl:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-gray-800">Documentos recientes</h2>
+        <a class="text-sm text-blue-600 hover:underline cursor-pointer">Ver bandeja completa</a>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-400 border-b border-gray-100">
+              <th class="font-medium pb-2 pr-4">Expediente</th>
+              <th class="font-medium pb-2 pr-4">Asunto</th>
+              <th class="font-medium pb-2 pr-4">Área</th>
+              <th class="font-medium pb-2 pr-4">Estado</th>
+              <th class="font-medium pb-2">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (doc of documentos; track doc.expediente) {
+              <tr class="border-b border-gray-50 last:border-0">
+                <td class="py-3 pr-4 align-top">
+                  <p class="font-semibold text-gray-800">{{ doc.expediente }}</p>
+                  <p class="text-xs text-gray-400">{{ doc.tipo }}</p>
+                </td>
+                <td class="py-3 pr-4 align-top text-gray-700">{{ doc.asunto }}</td>
+                <td class="py-3 pr-4 align-top text-gray-700">{{ doc.area }}</td>
+                <td class="py-3 pr-4 align-top">
+                  <span
+                    class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                    [class]="estadoClase[doc.estado]"
+                  >
+                    {{ doc.estado }}
+                  </span>
+                </td>
+                <td class="py-3 align-top text-gray-500 whitespace-nowrap">{{ doc.fecha }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Estado de trámites -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <h2 class="font-semibold text-gray-800 mb-6">Estado de trámites</h2>
+
+      <div class="flex justify-center mb-6">
+        <div
+          class="relative w-40 h-40 rounded-full flex items-center justify-center"
+          [style.background]="gradienteDona"
+        >
+          <div class="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center">
+            <span class="text-2xl font-bold text-gray-800">{{ totalTramites }}</span>
+            <span class="text-xs text-gray-400">este mes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        @for (t of tramites; track t.etiqueta) {
+          <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="t.color"></span>
+              <span class="text-gray-600">{{ t.etiqueta }}</span>
+            </div>
+            <span class="font-semibold text-gray-800">{{ t.valor }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

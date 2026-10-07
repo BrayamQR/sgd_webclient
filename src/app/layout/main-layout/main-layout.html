@@ -1,0 +1,10 @@
+<div class="min-h-screen bg-gray-200 md:h-screen md:overflow-hidden">
+  <app-sidebar [abierto]="menuAbierto()" (cerrar)="menuAbierto.set(false)" />
+
+  <div class="flex min-h-screen min-w-0 flex-col md:h-screen md:overflow-hidden md:pl-16 lg:pl-70">
+    <app-header (alternarMenu)="menuAbierto.set(!menuAbierto())" />
+    <main class="flex-1 p-1 md:min-h-0 md:overflow-y-auto md:p-3 md:pb-0">
+      <router-outlet />
+    </main>
+  </div>
+</div>
